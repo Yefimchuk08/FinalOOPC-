@@ -12,10 +12,11 @@ void Menu(Elements& stock) {
     Pizza piza;
     string filename = "pizzas.txt";
     int choice;
+    float balance = 500.0; 
 
     while (true) {
         system("cls");
-        cout << "[1] - Show stock;\n[2] - Create and order a pizza;\n[3] - Show pizzas;\n[4] - Save to file;\n[5] - Load from file;\n[6] - Exit;\n";
+        cout << "[1] - Show stock;\n[2] - Create and order a pizza;\n[3] - Show pizzas;\n[4] - Save to file;\n[5] - Load from file;\n[6] - Show balance;\n[7] - Exit;\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -56,12 +57,34 @@ void Menu(Elements& stock) {
             cin >> price;
 
             Pizza newPizza(name, ingrNames, ingrQuantities, mass, price);
-            if (newPizza.Order(stock)) {
+
+            
+            bool ingredientsAvailable = newPizza.Order(stock);
+            if (ingredientsAvailable) {
                 pizzas.push_back(newPizza);
-                cout << "Pizza ordered successfully!" << endl;
+                balance += price; 
+                cout << "Pizza ordered successfully! $" << price << " added to the balance." << endl;
             }
             else {
-                cout << "Failed to order pizza due to insufficient stock!" << endl;
+                cout << "Not enough ingredients to make the pizza." << endl;
+            
+                char buyIngredients;
+                cout << "Do you want to buy the missing ingredients? (y/n): ";
+                cin >> buyIngredients;
+
+                if (buyIngredients == 'y' || buyIngredients == 'Y') {
+                    float cost = stock.CalculateCost(ingrNames, ingrQuantities);
+                    if (balance >= cost) {
+                        balance -= cost;
+                        stock.AddIngredients(ingrNames, ingrQuantities); 
+                        cout << "Ingredients bought successfully. Pizza can be made now." << endl;
+                        pizzas.push_back(newPizza);
+                        balance += price;
+                    }
+                    else {
+                        cout << "Not enough money to buy the ingredients!" << endl;
+                    }
+                }
             }
             system("pause");
             break;
@@ -98,7 +121,13 @@ void Menu(Elements& stock) {
             }
             system("pause");
             break;
+
         case 6:
+            cout << "Pizzeria's current balance: $" << balance << endl;
+            system("pause");
+            break;
+
+        case 7:
             return;
 
         default:
@@ -108,6 +137,7 @@ void Menu(Elements& stock) {
         }
     }
 }
+
 
 int main() {
     Elements stock;
