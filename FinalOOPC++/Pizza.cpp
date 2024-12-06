@@ -38,16 +38,26 @@ bool Pizza::SaveToFile(const string& path) const {
 }
 
 bool Pizza::LoadFromFile(const string& path, vector<Pizza>& pizzas) {
+    cout << "Opening file: " << path << endl;
     ifstream file(path);
-    if (file.is_open()) {
-        string line;
-        while (getline(file, line)) {
+    if (!file.is_open()) {
+        cout << "Failed to open file!" << endl;
+        return false;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        try {
+            cout << "Processing line: " << line << endl;
+
             stringstream ss(line);
             string name, ingredientsPart, massStr, priceStr;
-            getline(ss, name, ';');
-            getline(ss, ingredientsPart, ';');
-            getline(ss, massStr, ';');
-            getline(ss, priceStr);
+
+            if (!getline(ss, name, ';') || !getline(ss, ingredientsPart, ';') ||
+                !getline(ss, massStr, ';') || !getline(ss, priceStr)) {
+                cout << "Error: Incorrect line format!" << endl;
+                continue;
+            }
 
             vector<string> ingredients;
             vector<float> quantities;
@@ -56,20 +66,26 @@ bool Pizza::LoadFromFile(const string& path, vector<Pizza>& pizzas) {
 
             while (getline(ingrStream, ingredientPair, ',')) {
                 size_t delimiterPos = ingredientPair.find(':');
-                if (delimiterPos != string::npos) {
-                    ingredients.push_back(ingredientPair.substr(0, delimiterPos));
-                    quantities.push_back(stof(ingredientPair.substr(delimiterPos + 1)));
+                if (delimiterPos == string::npos) {
+                    cout << "Error: Ingredient format incorrect!" << endl;
+                    continue;
                 }
+                ingredients.push_back(ingredientPair.substr(0, delimiterPos));
+                quantities.push_back(stof(ingredientPair.substr(delimiterPos + 1)));
             }
+
             float mass = stof(massStr);
             float price = stof(priceStr);
             pizzas.emplace_back(name, ingredients, quantities, mass, price);
         }
-        file.close();
-        return true;
+        catch (const exception& e) {
+            cout << "Error: " << e.what() << endl;
+            return false;
+        }
     }
-    else {
-        cout << "Failed to open file!" << endl;
-        return false;
-    }
+
+    file.close();
+    cout << "File processed successfully." << endl;
+    return true;
 }
+
