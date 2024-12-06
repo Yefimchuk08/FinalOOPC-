@@ -42,3 +42,29 @@ void Elements::ShowStock() const {
         cout << name[i] << ": " << quantities[i] << " grams" << endl;
     }
 }
+
+float Elements::CalculateCost(const vector<string>& ingrNames, const vector<float>& ingrQuantities) {
+    float totalCost = 0.0;
+    for (size_t i = 0; i < ingrNames.size(); i++) {
+        for (size_t j = 0; j < name.size(); j++) {
+            if (name[j] == ingrNames[i]) {
+              
+                float ingredientPricePerGram = pricesForG[j]; 
+                totalCost += ingredientPricePerGram * ingrQuantities[i];
+                break;
+            }
+        }
+    }
+    return totalCost;
+}
+void Elements::AddIngredients(const vector<string>& ingrNames, const vector<float>& ingrQuantities) {
+    for (size_t i = 0; i < ingrNames.size(); i++) {
+        for (size_t j = 0; j < name.size(); j++) {
+            if (name[j] == ingrNames[i]) {
+                quantities[j] += ingrQuantities[i];
+                break;
+            }
+        }
+    }
+}
+
